@@ -1,3 +1,9 @@
+# Taint Test
+taint_unit_test/bin/
+tests/taint2/cdrom/
+tests/taint2/*-rr-nondet.log
+tests/taint2/*-rr-snp
+
 # Prerequisites
 *.d
 

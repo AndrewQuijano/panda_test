@@ -3,7 +3,6 @@
 import os
 import sys
 import subprocess
-import wget
 import shutil
 from pathlib import Path
 
@@ -19,21 +18,9 @@ CURR_DIR = Path(__file__).parent.absolute()
 HOST_PROG_DIR = CURR_DIR.joinpath(TEST_PROG_DIR)
 HOST_HDR_FILE = CURR_DIR.parent.parent.joinpath(TEST_HDR_DIR, TEST_HDR_FILE)
 
-QCOW = "bionic-server-cloudimg-amd64.qcow2"
-BASE_URL = "http://panda-re.mit.edu/qcows/linux/ubuntu/1804/x86_64/"
-QCOW_URL = BASE_URL + QCOW
-HOST_QCOW_PATH = CURR_DIR.joinpath(QCOW)
-
-def host_download_qcow():
-    print(HOST_QCOW_PATH)
-    if not HOST_QCOW_PATH.is_file():
-        print("\nDownloading \'{}\'...".format(QCOW))
-        wget.download(QCOW_URL)
-        assert(HOST_QCOW_PATH.is_file())
 
 @blocking
 def run_in_guest():
-
     # Mount src in guest
     panda.revert_sync("root")
     shutil.copy2(HOST_HDR_FILE, HOST_PROG_DIR)
@@ -90,20 +77,10 @@ def run_in_guest():
 
     # Logs
     print(panda.run_serial_cmd("dmesg | tail -30"))
-
     panda.end_analysis()
 
+
 if __name__ == "__main__":
-
-    host_download_qcow()
-
-    panda = Panda(
-        arch = "x86_64",
-        qcow = str(HOST_QCOW_PATH),
-        extra_args = "-nographic",
-        expect_prompt = rb"root@ubuntu:.*",
-        mem = "1G"
-    )
-
+    panda = Panda(generic="x86_64")
     panda.queue_async(run_in_guest)
     panda.run()
