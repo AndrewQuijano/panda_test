@@ -1,0 +1,10 @@
+Documentation:
+  - '**/*.md'
+
+Github-files:
+  - .github/**
+
+Test-Code:
+  - '*.c'
+  - '*.py'
+  - '*.h'

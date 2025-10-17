@@ -1,0 +1,34 @@
+name: Parallel Tests
+
+# For PRs to dev or pushes that modify the root Dockerfile, build from scratch
+# then run CI tests using that container in parallel
+# For forked repos that can't use our panda-arc test suite, just build and run make check
+on:
+  # Allow to repo owner to manually run this workflow for external PRs once code is vetted
+  workflow_dispatch:
+
+  # Run automatically for internal PRs and pushes
+  pull_request:
+    branches:
+      - master
+  #push:
+  #  paths: ['Dockerfile'] # If this file changed, we'd need to do a clean build (this action)
+  #  otherwise we could speed this up by pulling the last container of 'dev', copying
+  #  code into it, and then rebuilding
+
+jobs:
+  test_debian:
+    if: github.repository == 'panda-re/panda_test'
+    runs-on: panda-arc
+    strategy:
+        matrix:
+          ubuntu_version: [22.04]
+    steps:
+      - name: Get latest PANDA Debian package and PyPanda wheel for Ubuntu ${{ matrix.ubuntu_version }}
+        run: |
+            curl -LJ -o /tmp/pandare_${{ matrix.ubuntu_version }}.deb https://github.com/panda-re/panda/releases/latest/download/pandare_${{ matrix.ubuntu_version }}.deb
+            sudo apt-get install /tmp/pandare_${{ matrix.ubuntu_version }}.deb
+            pip install pandare
+      - name: Run tests (Will try running once the full test suite is in place)
+        run: |
+            echo "Running tests on Ubuntu ${{ matrix.ubuntu_version }}"
